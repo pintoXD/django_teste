@@ -1,13 +1,18 @@
 import multiprocessing
 import test2
 import time
-
+import sys
 
 
 init = time.monotonic()
 
+def change_stdout():
+    sys.stdout = open("teste.txt", "a")
+
+
 if __name__ == "__main__":  # confirms that the code is under main function
     # names = ['America', 'Europe', 'Africa']
+    change_stdout()
     procs = []
     print("Aqui 1")
     proc = multiprocessing.Process(name='proc', target=test2.repeat_datetime)  # instantiating without any argument
