@@ -1,0 +1,9 @@
+__file__ is /home/pinto/Documentos/repos/django_teste/myapp/teste_1.py
+Iniciando
+0
+1
+2
+3
+Teste soma:
+6
+5

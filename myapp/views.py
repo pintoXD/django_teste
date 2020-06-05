@@ -2,37 +2,62 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import loader
 from .forms import MyForm
-from multiprocessing import Process
 from .teste_1 import print_data
 import requests
+import multiprocessing
 import sys
+sys.path.append("/home/pinto/Documentos/repos/LTIs200simulator/")
+import runSensor
+
 # from subprocess import run, PIPE
 
 
+id_queue = multiprocessing.Queue(1)
+content_queue = multiprocessing.Queue(1)
 
 
 
-def button(request):
-    return render(request, 'home.html')
+def callSensor(input_data):
 
+    global id_queue
+    global content_queue
 
-def output(request):
+    #Faz isso pra não limpar a queue. Que se limpar, perde
+    # todos os dados de fila
+    #
     
-    data = requests.get("https://www.google.com/")
-    print(data.text)
-    data = data.text
-    return render(request, 'home.html', {'data': data})
 
-def external(request):
-    inp = request.POST.get('param')
+    aux_queue = id_queue
+    #id_queue recebe como elemento uma lista contendo dois parametros
+    #O primeiro é o id do processo pai
+    #O segundo é o id do processo filho
+    #
+    #Se o segundo parametro num tiver nada, processo não tem filh, mas o processo
+    #de chamada do sensor virtual já foi feito alguma vez
 
-    out = run([sys.executable, 
-              '/home/otto/Documentos/Mobit/simulador/djangofiles/ottoenv/test.py', inp], shell=False, stdout=PIPE)
+    #Se id_queue num tiver nada, quer dizer que nunca se foi
+    # chamado o sensor virtual.
+    # 
+    # sdfasdf
+    #  
 
-    print(out)
+    if(id_queue.empty()):
 
-    return render(request, 'home.html', {'data1':out.stdout.decode('UTF-8')})
+        id_queue.put([multiprocessing.current_process().pid, 
+                      None])
+        
+        content_queue.put(input_data)
 
+        proc = multiprocessing.Process(target=runSensor.VirtualSensor, args=(id_queue,content_queue,), daemon=True)
+        proc.start()
+
+    else:
+
+        content_queue.put(input_data)
+
+
+
+    
 
 def responseform(request):
      #if form is submitted
@@ -54,10 +79,7 @@ def responseform(request):
         
             input_data = [max_speed,min_speed,max_capture_distance,min_capture_distance,approximation]
 
-            proc = Process(target=print_data, args=(input_data,))
-            proc.start()
-
-            
+            callSensor(input_data)           
 
             # name = myForm.cleaned_data['name']
             # email = myForm.cleaned_data['email']
@@ -76,7 +98,7 @@ def responseform(request):
 
             template = loader.get_template('thankyou.html')
 
-            proc.join()
+            # proc.join()
 
             return HttpResponse(template.render(context, request))
 
