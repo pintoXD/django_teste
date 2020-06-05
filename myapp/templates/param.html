@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Mobit</title>
+        <meta charset="UTF-8">
+    </head>
+
+    <body>
+        <h2>Entrada de parâmetros</h2>
+
+        <div class="row">
+
+            <div class="column">
+
+                <form action="/thankyou/" method="post">
+                        {% csrf_token %}
+                        <table>
+                            {{form.as_table}}
+                        </table>
+                    <input type="submit" value="Salvar" />
+                </form>
+
+            </div>
+<!-- 
+            <div class="column">
+
+                <form action="/serial/" method="post">
+                    {% csrf_token %}
+                    <table>
+                        {{serial.as_table}}
+                    </table>
+                    <input type="submit" value="Configurar" />
+                </form>
+
+            </div> -->
+
+        </div>
+
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% comment %}<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Python button script
+        </title>
+    </head>
+    <body>
+         <button onclick="location.href='{% url 'script' %}'">Execute Script</button> <hr>
+        {% if data %}
+        
+        {{data | safe}}
+
+        {% endif %} {% endcomment %}
+
+        {% comment %} <form action='/external' method="post">
+            {% csrf_token %}
+            Input Text:
+            <input type="text" name="param" required><br><br>
+            {{data_external}}<br><br>
+            {{data1}}
+            <br><br>
+            <input type="submit" value="Execute External Python Script">
+        </form> {% endcomment %}
+
+
+        {% comment %} <form action="/your-name" method="post">
+            {% csrf_token %}
+            <label for="your_name">Your name: </label>
+            <input id="your_name" type="text" name="your_name" value="{{ current_name }}">
+            <input type="submit" value="OK">
+        </form>  {% endcomment %}
+
+        {% comment %} <form>
+            {% csrf_token %}
+            {{form}}
+        <input type="submit" value="Submit" />
+        </form>
+
+    </body>
+</html> {% endcomment %}
+
+
+
+
+
+
+
+

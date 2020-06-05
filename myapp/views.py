@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import loader
-from .forms import MyForm
-from .teste_1 import print_data
+from .forms import MyForm, SerialForm
+# from .teste_1 import print_data
 import requests
 import multiprocessing
 import sys
@@ -16,6 +16,11 @@ id_queue = multiprocessing.Queue(1)
 content_queue = multiprocessing.Queue(1)
 
 
+
+
+
+def home(request):
+    return render(request, 'home.html')
 
 def callSensor(input_data):
 
@@ -64,8 +69,6 @@ def responseform(request):
      if request.method == 'POST':
         myForm = MyForm(request.POST)
 
-        
-
         if myForm.is_valid():
             
             
@@ -109,10 +112,46 @@ def responseform(request):
      else:
          form = MyForm()
 
-     return render(request, 'home.html', {'form':form});
+     return render(request, 'param.html', {'form':form});
 
 
+def serialform(request):
+    #if form is submitted
+    if request.method == 'POST':
+        myForm = SerialForm(request.POST)
 
+        if myForm.is_valid():
+
+            serial_port = myForm.cleaned_data['serial_port']
+            baudrate = myForm.cleaned_data['baudrate']
+
+            serial_config = [serial_port, baudrate]
+            f = open("serial.cfg","w+")
+
+            f.write(serial_config)
+
+            f.close()
+
+            
+            context = {
+
+                'serial_port': serial_port,
+                'baudrate': baudrate
+            }
+
+            template = loader.get_template('serialstatus.html')
+
+            # proc.join()
+
+            return HttpResponse(template.render(context, request))
+
+            # return render(request, 'home.html' , context)
+
+
+    else:
+         form2 = SerialForm()
+
+    return render(request, 'ser.html', {'serial': form2});
 
 
 # from django.http import HttpResponse

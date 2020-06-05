@@ -18,8 +18,12 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    path('response/', views.responseform),
-    path('thankyou/', views.responseform)
+    # path('', views.responseform),
+    path('', views.home),
+    path('param/', views.responseform),
+    path('thankyou/', views.responseform),
+    path('serialcfg/', views.serialform),
+    path('serial/', views.serialform)
     # path('external', views.external),
     # # path('your-name',views.NameForm),
     # path('output', views.output, name="script"),
