@@ -22,8 +22,9 @@ urlpatterns = [
     path('', views.home),
     path('param/', views.responseform),
     path('thankyou/', views.responseform),
-    path('serialcfg/', views.serialform),
-    path('serial/', views.serialform)
+    # path('manualparam/', views.serialform),
+    # path('manualok/', views.serialform),
+
     # path('external', views.external),
     # # path('your-name',views.NameForm),
     # path('output', views.output, name="script"),

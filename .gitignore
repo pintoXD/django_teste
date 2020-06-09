@@ -12,3 +12,17 @@ myapp/__pycache__/models.cpython-36.pyc
 myapp/__pycache__/forms.cpython-36.pyc
 myapp/__pycache__/admin.cpython-36.pyc
 myapp/__pycache__/__init__.cpython-36.pyc
+myapp/__pycache__/__init__.cpython-36.pyc
+myapp/__pycache__/admin.cpython-36.pyc
+myapp/__pycache__/choices.cpython-36.pyc
+myapp/__pycache__/forms.cpython-36.pyc
+myapp/__pycache__/models.cpython-36.pyc
+myapp/__pycache__/urls.cpython-36.pyc
+myapp/__pycache__/views.cpython-36.pyc
+myapp/migrations/__pycache__/__init__.cpython-36.pyc
+ottoenv/lib/python3.6/site-packages/__pycache__/autopep8.cpython-36.pyc
+ottoenv/lib/python3.6/site-packages/__pycache__/pycodestyle.cpython-36.pyc
+teste/__pycache__/__init__.cpython-36.pyc
+teste/__pycache__/settings.cpython-36.pyc
+teste/__pycache__/urls.cpython-36.pyc
+teste/__pycache__/wsgi.cpython-36.pyc

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import loader
-from .forms import MyForm, SerialForm
+from .forms import MyForm
 # from .teste_1 import print_data
 import requests
 import multiprocessing
@@ -13,6 +13,7 @@ import runSensor
 
 
 id_queue = multiprocessing.Queue(1)
+config_queue = multiprocessing.Queue(1)
 content_queue = multiprocessing.Queue(1)
 
 
@@ -51,14 +52,14 @@ def callSensor(input_data):
         id_queue.put([multiprocessing.current_process().pid, 
                       None])
         
-        content_queue.put(input_data)
+        config_queue.put(input_data)
 
-        proc = multiprocessing.Process(target=runSensor.VirtualSensor, args=(id_queue,content_queue,), daemon=True)
+        proc = multiprocessing.Process(target=runSensor.VirtualSensor, args=(id_queue,config_queue,), daemon=True)
         proc.start()
 
     else:
 
-        content_queue.put(input_data)
+        config_queue.put(input_data)
 
 
 
@@ -76,13 +77,21 @@ def responseform(request):
             
             max_speed = myForm.cleaned_data['max_speed']
             min_speed = myForm.cleaned_data['min_speed']
-            max_capture_distance = myForm.cleaned_data['max_capture_distance']
-            min_capture_distance = myForm.cleaned_data['min_capture_distance']
-            approximation = myForm.cleaned_data['approximation']
-        
-            input_data = [max_speed,min_speed,max_capture_distance,min_capture_distance,approximation]
 
-            callSensor(input_data)           
+            capture_distance = myForm.cleaned_data['capture_distance']
+            
+            approximation = myForm.cleaned_data['approximation']
+            serial_port = myForm.cleaned_data['serial_port']
+
+            gap = myForm.cleaned_data['gap']
+            gap_mode = myForm.cleaned_data['gap_mode'] 
+            repeat = myForm.cleaned_data['repeat']
+
+            input_data = [max_speed,min_speed,
+            capture_distance,approximation,serial_port]
+
+
+            # callSensor(input_data)           
 
             # name = myForm.cleaned_data['name']
             # email = myForm.cleaned_data['email']
@@ -92,9 +101,13 @@ def responseform(request):
 
                 'max_speed': max_speed,
                 'min_speed': min_speed,
-                'max_capture_distance': max_capture_distance,
-                'min_capture_distance': min_capture_distance,
-                'approximation': approximation
+                'capture_distance': capture_distance,
+                'approximation': approximation,
+                'serial_port': serial_port,
+                'gap': gap,
+                'gap_mode': gap_mode,
+                'repeat': repeat
+
 
 
             }
@@ -115,31 +128,44 @@ def responseform(request):
      return render(request, 'param.html', {'form':form});
 
 
-def serialform(request):
+def manualForm(request):
+    #Form pra lidar com a entrada manual de dados de velocidade
     #if form is submitted
     if request.method == 'POST':
-        myForm = SerialForm(request.POST)
+        myForm = MyForm(request.POST)
 
         if myForm.is_valid():
 
+            speed_list = myForm.cleaned_data['max_speed']
+                        
+            approximation = myForm.cleaned_data['approximation']
+
             serial_port = myForm.cleaned_data['serial_port']
-            baudrate = myForm.cleaned_data['baudrate']
 
-            serial_config = [serial_port, baudrate]
-            f = open("serial.cfg","w+")
+            input_data = [max_speed, min_speed, max_capture_distance,
+            min_capture_distance, approximation, serial_port]
 
-            f.write(serial_config)
+            # callSensor(input_data)
 
-            f.close()
+            # name = myForm.cleaned_data['name']
+            # email = myForm.cleaned_data['email']
+            # feedback = myForm.cleaned_data['feedback']
 
-            
             context = {
 
+                'max_speed': max_speed,
+                'min_speed': min_speed,
+                'capture_distance': capture_distance,
+                'approximation': approximation,
                 'serial_port': serial_port,
-                'baudrate': baudrate
+                'gap': gap,
+                'gap_mode': gap_mode,
+                'repeat': repeat
+
             }
 
-            template = loader.get_template('serialstatus.html')
+
+            template = loader.get_template('thankyou.html')
 
             # proc.join()
 
@@ -149,34 +175,73 @@ def serialform(request):
 
 
     else:
-         form2 = SerialForm()
+         form = MyForm()
 
-    return render(request, 'ser.html', {'serial': form2});
-
-
-# from django.http import HttpResponse
-# from .forms import ContactForm
-
-# # Create your views here.
+    return render(request, 'param.html', {'form': form});
 
 
-# def contact(request):
-
-#     # return HttpResponse('contact view')
-
+# def serialform(request):
+#     #if form is submitted
 #     if request.method == 'POST':
-#         form  = ContactForm(request.POST)
-#         if form.is_valid():
+#         myForm = SerialForm(request.POST)
 
-#             print("Teste")
-#             name = form.cleaned_data['name']
-#             email = form.cleaned_data['email']
-#             print(name, email)
+#         if myForm.is_valid():
+
+#             serial_port = myForm.cleaned_data['serial_port']
+#             baudrate = myForm.cleaned_data['baudrate']
+
+#             serial_config = [serial_port, baudrate]
+#             f = open("serial.cfg","w+")
+
+#             f.write(serial_config)
+
+#             f.close()
+
+            
+#             context = {
+
+#                 'serial_port': serial_port,
+#                 'baudrate': baudrate
+#             }
+
+#             template = loader.get_template('serialstatus.html')
+
+#             # proc.join()
+
+#             return HttpResponse(template.render(context, request))
+
+#             # return render(request, 'home.html' , context)
+
+
+#     else:
+#          form2 = SerialForm()
+
+#     return render(request, 'ser.html', {'serial': form2});
+
+
+# # from django.http import HttpResponse
+# # from .forms import ContactForm
+
+# # # Create your views here.
+
+
+# # def contact(request):
+
+# #     # return HttpResponse('contact view')
+
+# #     if request.method == 'POST':
+# #         form  = ContactForm(request.POST)
+# #         if form.is_valid():
+
+# #             print("Teste")
+# #             name = form.cleaned_data['name']
+# #             email = form.cleaned_data['email']
+# #             print(name, email)
            
 
 
-#     form = ContactForm()
-#     return render(request, 'form.html', {'form':form})
+# #     form = ContactForm()
+# #     return render(request, 'form.html', {'form':form})
 
 
     

@@ -3,17 +3,25 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Serial</title>
+    <title>Thank You</title>
 </head>
 
 <body>
-    <h2>Configuração serial:</h2>
+    <h2>Response Entered by you:</h2>
     <form method="post">
 
         <ul>
-            <li>Velocidade Max: <strong>{{ serial_port }}</strong></li>
+            <li>Velocidade Max: <strong>{{ max_speed }}</strong></li>
 
-            <li>Velocidade Min: <strong>{{ baudrate }}</strong></li>
+            <li>Distância Max: <strong>{{ capture_distance }}</strong></li>
+
+            <li>Aproximação: <strong>{{ approximation }}</strong></li>
+
+            <li>Porta serial: <strong>{{ serial_port }}</strong></li>
+
+            <li>Intervalo entre passagens: <strong>{{ gap }}</strong></li>
+            <li>Tipo de intervalo: <strong>{{ gap_mode }}</strong></li>
+            <li>Repetições: <strong>{{ repeat }}</strong></li>
 
         </ul>
     </form>
