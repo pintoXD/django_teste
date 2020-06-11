@@ -22,8 +22,8 @@ urlpatterns = [
     path('', views.home),
     path('param/', views.responseform),
     path('thankyou/', views.responseform),
-    # path('manualparam/', views.serialform),
-    # path('manualok/', views.serialform),
+    path('manualparam/', views.manualForm),
+    path('manualok/', views.manualForm),
 
     # path('external', views.external),
     # # path('your-name',views.NameForm),

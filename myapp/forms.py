@@ -21,8 +21,9 @@ class MyForm(forms.Form):
     #     attrs={'width': "100%", 'cols': "80", 'rows': "20", }))
 
 
-class manualForm(forms.Form):
-    max_speed = forms.IntegerField(label="Velocidade desejada", initial=60)
+class ManualForm(forms.Form):
+
+    max_speed = forms.IntegerField(label="Velocidade desejada", initial=50)
     
     capture_distance = forms.IntegerField(label="Distância de captura", initial=45)
 
@@ -30,8 +31,14 @@ class manualForm(forms.Form):
     serial_port = forms.CharField(label="Porta Serial", initial = '/dev/ttyUSB0')
 
     gap = forms.IntegerField(label="Tempo em segundos entre envio de passagens", initial=15 )
-    gap_mode = forms.ChoiceField(choices= GAP_CHOICES, label="Modo do intervalo de envio", initial="1")
+    gap_mode = forms.ChoiceField(choices= GAP_CHOICES, label="Modo do intervalo de envio", initial="shuffle")
     
+    file_input = forms.FileField(label="Arquivo de velocidades",
+                                 required=False, max_length=500)
+    repeat = forms.IntegerField(
+        label="Número de repetições de envio", initial=999)
+
+
 # class SerialForm(forms.Form):
 #     serial_port = forms.CharField(label="Porta Serial")
 #     baudrate = forms.IntegerField(label="Baudrate")
