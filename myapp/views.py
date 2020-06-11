@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import loader
-from .forms import MyForm, ManualForm
+from .forms import ShuffleForm, ManualForm
 # from .teste_1 import print_data
 import requests
 import multiprocessing
@@ -10,6 +10,7 @@ sys.path.append("../laser_simulator/")
 import runSensor
 import configparser
 import os
+import psutil
 
 # from subprocess import run, PIPE
 
@@ -17,7 +18,8 @@ import os
 id_queue = multiprocessing.Queue(1)
 config_queue = multiprocessing.Queue(1)
 content_queue = multiprocessing.Queue(1)
-
+status_dict = None
+id_list = None
 
 
 
@@ -30,13 +32,14 @@ def callSensor(input_data, config_data):
 
     global id_queue
     global content_queue
+    global config_queue
 
     #Faz isso pra não limpar a queue. Que se limpar, perde
     # todos os dados de fila
     #
     
 
-    aux_queue = id_queue
+    # aux_queue = id_queue
     #id_queue recebe como elemento uma lista contendo dois parametros
     #O primeiro é o id do processo pai
     #O segundo é o id do processo filho
@@ -52,16 +55,19 @@ def callSensor(input_data, config_data):
 
     if(id_queue.empty()):
 
-        id_queue.put([multiprocessing.current_process().pid, 
-                      None])
-        
-        content_queue.put(input_data)
-        config_queue.put(config_data)
 
-        proc = multiprocessing.Process(target=runSensor.VirtualSensor, 
-                        args=(id_queue,content_queue, config_queue,), daemon=True)
-       
-        proc.start()
+        if(id_list == None):
+
+            id_queue.put([multiprocessing.current_process().pid, 
+                        None])
+            
+            content_queue.put(input_data)
+            config_queue.put(config_data)
+
+            proc = multiprocessing.Process(target=runSensor.VirtualSensor, 
+                            args=(id_queue,content_queue, config_queue,), daemon=True)
+        
+            proc.start()
 
     else:
 
@@ -69,12 +75,112 @@ def callSensor(input_data, config_data):
         config_queue.put(config_data)
 
 
+
+def handle_uploaded_file(f):
+    with open(f.name, 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
+    if(os.path.exists(f.name)):
+        input_file = configparser.ConfigParser()
+
+        input_file.read(f.name)
+
+        speed_data = input_file['data']['speed']
+
+        speed_data = speed_data.strip('[]').split(',')
+
+        for i in range(len(speed_data)):
+
+            speed_data[i] = int(speed_data[i])
+
+        return speed_data
+
+    else:
+        print("Arquivo não encontrado")
+        raise FileNotFoundError
+
+def statusPage(request):
+    global status_dict
+    global id_queue
+    if(not id_queue.empty()):
+        
+        aux_queue = id_queue
+
+        print("Status id_queue antes: ", id_queue.empty())
+
+        aux_list = aux_queue.get_nowait()
+
+        print("Status id_queue depois: ", id_queue.empty())
+        status_dict["parent_pid"] = aux_list[0]
+        status_dict["child_pid"] = aux_list[1]
+
+        if(psutil.pid_exists(status_dict["child_pid"])):
+            status_dict["is_child_alive"] = "Sim"
+        else:
+            status_dict["child_pid"] = None
+            status_dict["is_child_alive"] = "Não"
+            # id_queue.get_nowait()
+
+
+        
+
+        return render(request, 'status.html', status_dict)
+
     
 
-def responseform(request):
+    else:
+        
+        return render(request, 'status_zero.html')
+
+
+
+def killChild(request):
+
+    global status_dict
+
+    print("Status id_queue vazia: ", id_queue.empty())
+
+    if(not id_queue.empty()):
+
+        print("Entrou meno aqui")
+
+        
+        aux_list = id_queue.get_nowait()
+        status_dict["parent_pid"] = aux_list[0]
+        status_dict["child_pid"] = aux_list[1]
+
+        if(psutil.pid_exists(status_dict["child_pid"]) and (status_dict["child_pid"] != None)):
+            print("Primeiro if pra matar")
+            psutil.Process(status_dict["child_pid"]).terminate()
+            status_dict["child_pid"] = None
+        
+        elif(psutil.pid_exists(status_dict["child_pid"]) and (status_dict["child_pid"] == None)):
+            print("Segundo if pra matar")
+            psutil.Process(status_dict["child_pid"]).terminate()
+
+        elif(status_dict["child_pid"] != None):
+            
+            status_dict["child_pid"] = None
+
+
+        id_queue.get_nowait()
+
+        if(not content_queue.empty()):
+            content_queue.get_nowait()
+        if(not config_queue.empty()):
+            config_queue.get_nowait()
+
+        return render(request, 'status.html', status_dict)
+
+    else if():
+        return render(request, 'status_zero.html')
+
+
+def shuffleForm(request):
      #if form is submitted
      if request.method == 'POST':
-        myForm = MyForm(request.POST)
+        myForm = ShuffleForm(request.POST)
 
         if myForm.is_valid():
             
@@ -91,7 +197,8 @@ def responseform(request):
             serial_port = myForm.cleaned_data['serial_port']
 
             gap = myForm.cleaned_data['gap']
-            gap_mode = myForm.cleaned_data['gap_mode'] 
+            gap_mode = myForm.cleaned_data['gap_mode']
+            gap_mode = dict(myForm.fields['gap_mode'].choices)[gap_mode]
             repeat = myForm.cleaned_data['repeat']
 
             input_data = [max_speed,min_speed,
@@ -124,6 +231,10 @@ def responseform(request):
 
             }
 
+            global status_dict
+            status_dict = context
+            status_dict["mode"] = mode
+
             template = loader.get_template('thankyou.html')
 
             # proc.join()
@@ -135,7 +246,7 @@ def responseform(request):
 
 
      else:
-         form = MyForm()
+         form = ShuffleForm()
 
      return render(request, 'param.html', {'form':form});
 
@@ -211,6 +322,10 @@ def manualForm(request):
 
 
             }
+            
+            global status_dict
+            status_dict = context
+            status_dict["mode"] = mode
 
 
             template = loader.get_template('manualok.html')
@@ -228,30 +343,6 @@ def manualForm(request):
     return render(request, 'manual.html', {'manual': form});
 
 
-def handle_uploaded_file(f):
-    with open(f.name, 'wb+') as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-
-    if(os.path.exists(f.name)):
-        input_file = configparser.ConfigParser()
-
-        input_file.read(f.name)
-
-        speed_data = input_file['data']['speed']
-
-        speed_data = speed_data.strip('[]').split(',')
-
-        for i in range(len(speed_data)):
-
-            speed_data[i] = int(speed_data[i])
-
-        
-        return speed_data
-
-    else:
-        print("Arquivo não encontrado")
-        raise FileNotFoundError
 
 
 

@@ -20,10 +20,12 @@ from . import views
 urlpatterns = [
     # path('', views.responseform),
     path('', views.home),
-    path('param/', views.responseform),
-    path('thankyou/', views.responseform),
+    path('status/', views.statusPage),
+    path('param/', views.shuffleForm),
+    path('thankyou/', views.shuffleForm),
     path('manualparam/', views.manualForm),
     path('manualok/', views.manualForm),
+    path('killchild/', views.killChild)
 
     # path('external', views.external),
     # # path('your-name',views.NameForm),

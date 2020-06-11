@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Envio Status</title>
+</head>
+
+<body>
+    <h2>Status dos parâmetros enviados:</h2>
+    
+
+        <ul>
+            <li>Modo de envio: <strong>{{ mode }}</strong></li>
+
+            <li>Velocidade Max: <strong>{{ max_speed }}</strong></li>
+
+            <li>Distância de Captura: <strong>{{ capture_distance }}</strong></li>
+
+            <li>Aproximação: <strong>{{ approximation }}</strong></li>
+
+            <li>Porta serial: <strong>{{ serial_port }}</strong></li>
+
+            <li>Intervalo entre passagens: <strong>{{ gap }}</strong></li>
+
+            <li>Modo do Intervalo: <strong>{{ gap_mode }}</strong></li>
+
+            <li>Número de Repetições: <strong>{{ repeat }}</strong></li>
+
+            <li>ID processo pai: <strong>{{ parent_pid }}</strong></li>
+
+            <li>ID processo simulador: <strong>{{ child_pid }}</strong></li>
+
+            <li>Processo filho vivo: <strong>{{ is_child_alive }}</strong></li>
+
+
+            {% if  child_pid != None%}
+                <br>
+                <a href="/killchild/">Matar Processo</a>
+            {% else %}
+                <br>
+            {% endif %}
+
+        </ul>
+   
+</body>
+
+</html>

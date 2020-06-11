@@ -2,11 +2,11 @@ from django import forms
 from .choices import *
 
 
-class MyForm(forms.Form):
+class ShuffleForm(forms.Form):
     max_speed = forms.IntegerField(label="Velocidade máxima (Km/h)", initial=80)
     min_speed = forms.IntegerField(label="Velocidade mínima (Km/h)", initial=30)
      
-    capture_distance = forms.IntegerField(label="Distância de captura (m)", initial=45)
+    capture_distance = forms.IntegerField(label="Distância de captura (m)", initial=40)
 
     approximation = forms.BooleanField(label="Aproximação", required=False)
     serial_port = forms.CharField(label="Porta Serial", initial = '/dev/ttyUSB0')
@@ -25,7 +25,7 @@ class ManualForm(forms.Form):
 
     max_speed = forms.IntegerField(label="Velocidade desejada", initial=50)
     
-    capture_distance = forms.IntegerField(label="Distância de captura", initial=45)
+    capture_distance = forms.IntegerField(label="Distância de captura", initial=40)
 
     approximation = forms.BooleanField(label="Aproximação", required=False)
     serial_port = forms.CharField(label="Porta Serial", initial = '/dev/ttyUSB0')
