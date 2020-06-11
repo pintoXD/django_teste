@@ -102,79 +102,61 @@ def handle_uploaded_file(f):
 
 def statusPage(request):
     global status_dict
-    global id_queue
+    global id_list
     if(not id_queue.empty()):
-        
-        aux_queue = id_queue
+        id_list = id_queue.get_nowait()
+        status_dict["parent_pid"] = id_list[0]
+        status_dict["child_pid"] = id_list[1]
 
-        print("Status id_queue antes: ", id_queue.empty())
-
-        aux_list = aux_queue.get_nowait()
-
-        print("Status id_queue depois: ", id_queue.empty())
-        status_dict["parent_pid"] = aux_list[0]
-        status_dict["child_pid"] = aux_list[1]
-
-        if(psutil.pid_exists(status_dict["child_pid"])):
-            status_dict["is_child_alive"] = "Sim"
-        else:
-            status_dict["child_pid"] = None
-            status_dict["is_child_alive"] = "Não"
-            # id_queue.get_nowait()
+    if(psutil.pid_exists(status_dict["child_pid"])):
+        status_dict["is_child_alive"] = "Sim"
+    else:
+        status_dict["child_pid"] = -1
+        status_dict["is_child_alive"] = "Não"
+        # id_queue.get_nowait()
 
 
         
 
-        return render(request, 'status.html', status_dict)
+    return render(request, 'status.html', status_dict)
 
     
-
-    else:
-        
-        return render(request, 'status_zero.html')
 
 
 
 def killChild(request):
 
     global status_dict
+    global id_list
 
     print("Status id_queue vazia: ", id_queue.empty())
 
     if(not id_queue.empty()):
+        id_list = id_queue.get_nowait()
+        status_dict["parent_pid"] = id_list[0]
+        status_dict["child_pid"] = id_list[1]
 
-        print("Entrou meno aqui")
+    if(psutil.pid_exists(status_dict["child_pid"])):
+        print("Primeiro if pra matar")
+        psutil.Process(status_dict["child_pid"]).terminate()
+        psutil.Process(status_dict["child_pid"]).wait()
 
-        
-        aux_list = id_queue.get_nowait()
-        status_dict["parent_pid"] = aux_list[0]
-        status_dict["child_pid"] = aux_list[1]
+        # status_dict["child_pid"] = None
 
-        if(psutil.pid_exists(status_dict["child_pid"]) and (status_dict["child_pid"] != None)):
-            print("Primeiro if pra matar")
-            psutil.Process(status_dict["child_pid"]).terminate()
-            status_dict["child_pid"] = None
-        
-        elif(psutil.pid_exists(status_dict["child_pid"]) and (status_dict["child_pid"] == None)):
-            print("Segundo if pra matar")
-            psutil.Process(status_dict["child_pid"]).terminate()
-
-        elif(status_dict["child_pid"] != None):
-            
-            status_dict["child_pid"] = None
-
-
-        id_queue.get_nowait()
-
+        if(not content_queue.empty()):
+            id_queue.get_nowait()
         if(not content_queue.empty()):
             content_queue.get_nowait()
         if(not config_queue.empty()):
             config_queue.get_nowait()
 
+
         return render(request, 'status.html', status_dict)
 
-    else if():
-        return render(request, 'status_zero.html')
+
+    else:
+
+        return render(request, 'status.html', status_dict)
 
 
 def shuffleForm(request):
