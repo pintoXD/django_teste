@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import loader
 from .forms import ShuffleForm, ManualForm
@@ -52,25 +52,27 @@ def callSensor(input_data, config_data):
     # 
     # sdfasdf
     #  
+    print("Chamou o call")
 
     if(id_queue.empty()):
 
+        print("Fila Vazia")
 
-        if(id_list == None):
+        # if(id_list == None):
 
-            id_queue.put([multiprocessing.current_process().pid, 
-                        None])
-            
-            content_queue.put(input_data)
-            config_queue.put(config_data)
-
-            proc = multiprocessing.Process(target=runSensor.VirtualSensor, 
-                            args=(id_queue,content_queue, config_queue,), daemon=True)
+        id_queue.put([multiprocessing.current_process().pid, 
+                    None])
         
-            proc.start()
+        content_queue.put(input_data)
+        config_queue.put(config_data)
+
+        proc = multiprocessing.Process(target=runSensor.VirtualSensor, 
+                        args=(id_queue,content_queue, config_queue,), daemon=True)
+    
+        proc.start()
 
     else:
-
+        print("Fila não tá Vazia")
         content_queue.put(input_data)
         config_queue.put(config_data)
 
@@ -107,6 +109,30 @@ def statusPage(request):
         id_list = id_queue.get_nowait()
         status_dict["parent_pid"] = id_list[0]
         status_dict["child_pid"] = id_list[1]
+    else:
+        if(id_list != None):
+            status_dict["parent_pid"] = id_list[0]
+            status_dict["child_pid"] = id_list[1]
+        else:
+            
+            status_dict = {
+                    'mode': -1,
+                    'max_speed': -1,
+                    'min_speed': -1,
+                    'capture_distance': -1,
+                    'approximation': -1,
+                    'serial_port': -1,
+                    'gap': -1,
+                    'gap_mode': -1,
+                    'repeat': -1
+
+            }
+
+            
+            
+            status_dict["parent_pid"] = -1
+            status_dict["child_pid"] = -1
+
 
     if(psutil.pid_exists(status_dict["child_pid"])):
         status_dict["is_child_alive"] = "Sim"
@@ -151,12 +177,13 @@ def killChild(request):
             config_queue.get_nowait()
 
 
-        return render(request, 'status.html', status_dict)
+        # return render(request, 'status.html', status_dict)
+        return redirect('/status/')
 
 
     else:
 
-        return render(request, 'status.html', status_dict)
+        return redirect('/status/')
 
 
 def shuffleForm(request):
@@ -221,7 +248,9 @@ def shuffleForm(request):
 
             # proc.join()
 
-            return HttpResponse(template.render(context, request))
+            # return HttpResponse(template.render(context, request))
+
+            return redirect('/status/')
 
             # return render(request, 'home.html' , context)
 
@@ -314,7 +343,9 @@ def manualForm(request):
 
             # proc.join()
 
-            return HttpResponse(template.render(context, request))
+            # return HttpResponse(template.render(context, request))
+
+            return redirect('/status/')
 
             # return render(request, 'home.html' , context)
 

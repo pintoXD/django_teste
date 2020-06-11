@@ -34,12 +34,15 @@
             <li>Processo filho vivo: <strong>{{ is_child_alive }}</strong></li>
 
 
-            {% if  child_pid != None%}
+            {% if  child_pid != -1%}
                 <br>
                 <a href="/killchild/">Matar Processo</a>
-            {% else %}
-                <br>
             {% endif %}
+
+            <br>
+
+            <a href="/">Home</a>
+            
 
         </ul>
    
